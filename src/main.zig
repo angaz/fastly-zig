@@ -19,8 +19,10 @@ const handlers = [_]Handler{
     mk_handler("/", index_handler),
     mk_handler("/hello", hello_handler),
     mk_handler("/ip", client_ip_handler),
+    mk_handler("/ok", ok_handler),
     mk_handler("/proxy", proxy_handler),
     mk_handler("/redirect", redirect_handler),
+    mk_handler("/teapot", teapot_handler),
 };
 
 fn serve(
@@ -55,10 +57,24 @@ fn index_handler(_: std.mem.Allocator, downstream: *zigly.Downstream, _: zigly.U
     try response.body.writeAll(
         \\/hello     - Responds with Hello, World!
         \\/ip        - Responds with the client's IP address
+        \\/ok        - Responds with 200 OK
         \\/proxy     - Proxies the name given by the `backend` query parameter
         \\/redirect  - Redirects to this repo's URL
+        \\/teapot    - Responds with 418 I'm a teapot
         \\
     );
+    try response.finish();
+}
+
+fn ok_handler(_: std.mem.Allocator, downstream: *zigly.Downstream, _: zigly.Uri) !void {
+    var response = downstream.response;
+    try response.setStatus(200);
+    try response.finish();
+}
+
+fn teapot_handler(_: std.mem.Allocator, downstream: *zigly.Downstream, _: zigly.Uri) !void {
+    var response = downstream.response;
+    try response.setStatus(418);
     try response.finish();
 }
 
