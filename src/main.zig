@@ -18,9 +18,9 @@ fn mk_handler(path: []const u8, func: HandlerFunc) Handler {
 const handlers = [_]Handler{
     mk_handler("/", index_handler),
     mk_handler("/hello", hello_handler),
+    mk_handler("/ip", client_ip_handler),
     mk_handler("/proxy", proxy_handler),
     mk_handler("/redirect", redirect_handler),
-    mk_handler("/ip", client_ip_handler),
 };
 
 fn serve(
@@ -45,7 +45,7 @@ fn serve(
 }
 
 pub fn main() !void {
-    const alloc = std.heap.page_allocator;
+    const alloc = std.heap.wasm_allocator;
 
     try serve(alloc, not_found_handler);
 }
@@ -92,7 +92,7 @@ fn proxy_handler(alloc: std.mem.Allocator, downstream: *zigly.Downstream, uri: z
 }
 
 fn client_ip_handler(alloc: std.mem.Allocator, downstream: *zigly.Downstream, _: zigly.Uri) !void {
-    const ip = try downstream.request.geClientIpAddr();
+    const ip = try zigly.Downstream.getClientIpAddr();
     const ip_str = try ip.print(alloc);
 
     var response = downstream.response;

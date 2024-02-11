@@ -16,8 +16,8 @@
     // internet connectivity.
     .dependencies = .{
         .zigly = .{
-            .url = "https://github.com/angaz/zigly/archive/97652767f064a0de0f69022285fb74d6b75e959a.tar.gz",
-            .hash = "12204b8588b86ce9dfeebf7a74ba3a71efd37df0125582eae1f8548c0af3fb40b6ed",
+            .url = "https://github.com/angaz/zigly/archive/42fa76aa573ec9c1b8bbf7e94036ac192a4ec2cf.tar.gz",
+            .hash = "1220a5676eb25a7e7821b25ddfd28eec7cb2425abf15c80bf63f2a9e7830cf2b8278",
         },
     },
     .paths = .{
