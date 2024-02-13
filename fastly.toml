@@ -8,8 +8,11 @@ manifest_version = 3
 name = "fastly-zig"
 service_id = ""
 
-[scripts]
-build = "zig build -Doptimize=ReleaseSmall && mkdir -p bin && cp zig-out/bin/*.wasm bin/main.wasm"
+# [scripts]
+# build = "zig build -Doptimize=ReleaseSmall && mkdir -p bin && cp zig-out/bin/*.wasm bin/main.wasm"
 
 [local_server.backends.example]
 url = "https://example.com"
+
+[local_server.backends.weather]
+url = "https://wttr.in"

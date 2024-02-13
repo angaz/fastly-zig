@@ -30,7 +30,17 @@
               name = "serve";
               help = "Start a local dev server";
               command = ''
-                zig build -Doptimize=ReleaseSmall && fastly compute serve --skip-build --file zig-out/bin/main.wasm
+                zig build -Doptimize=Debug && \
+                fastly compute serve --skip-build --file zig-out/bin/main.wasm
+              '';
+            }
+            {
+              name = "publish";
+              help = "Compile and publish the WASM executable";
+              command = ''
+                zig build -Doptimize=ReleaseSmall && \
+                fastly compute pack --wasm-binary zig-out/bin/main.wasm && \
+                fastly compute deploy --package pkg/package.tar.gz
               '';
             }
           ];
