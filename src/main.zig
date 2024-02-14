@@ -40,7 +40,11 @@ fn serve(
 
     for (handlers) |handler| {
         if (std.mem.eql(u8, uri.path, handler.path)) {
-            try handler.func(alloc, &downstream, uri);
+            handler.func(alloc, &downstream, uri) catch |err| {
+                std.debug.print("{s} {s}\n", .{ uri_str, @errorName(err) });
+
+                return err;
+            };
 
             return;
         }
@@ -100,7 +104,7 @@ fn favicon_handler(_: std.mem.Allocator, downstream: *zigly.http.Downstream, _: 
     try response.finish();
 }
 
-fn get_weather(allocator: std.mem.Allocator) !zigly.http.IncomingResponse {
+fn get_weather(allocator: std.mem.Allocator, downstream: *zigly.http.Downstream) !zigly.http.IncomingResponse {
     const ip = try zigly.http.Downstream.getClientIpAddr();
 
     var location_buf = [_]u8{0} ** 4096;
@@ -117,16 +121,21 @@ fn get_weather(allocator: std.mem.Allocator) !zigly.http.IncomingResponse {
     std.mem.copyForwards(u8, weather_url[0..], base_url);
     std.mem.copyForwards(u8, weather_url[base_url.len..], city);
 
+    const accept_header = try downstream.request.headers.get(allocator, "Accept");
+    defer allocator.free(accept_header);
+    const user_agent_header = try downstream.request.headers.get(allocator, "User-Agent");
+    defer allocator.free(user_agent_header);
+
     var weather_req = try zigly.http.Request.new("GET", weather_url);
-    try weather_req.headers.set("Accept", "text/plain");
-    try weather_req.headers.set("User-Agent", "curl/8.5.0");
+    try weather_req.headers.set("Accept", accept_header);
+    try weather_req.headers.set("User-Agent", user_agent_header);
     const weather_resp = try weather_req.send("weather");
 
     return weather_resp;
 }
 
 fn weather_handler(allocator: std.mem.Allocator, downstream: *zigly.http.Downstream, _: zigly.Uri) !void {
-    var weather_resp = try get_weather(allocator);
+    var weather_resp = try get_weather(allocator, downstream);
 
     try downstream.response.pipe(&weather_resp, true, true);
 }
